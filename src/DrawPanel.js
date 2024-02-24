@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Stage, Layer, Line, Text, Group } from "react-konva";
 import { saveAs } from "file-saver";
 import SvgComponent from "./SvgComponent";
-import "./InitialDrawPanel.css";
+import "./DrawPanel.css";
 
 // Функция для округления значения до сетки
 const roundToGrid = (value, gridSize) => {

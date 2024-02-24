@@ -1,5 +1,5 @@
 import React from "react";
-import DrawPane from "./InitialDrawPanel";
+import DrawPane from "./DrawPanel";
 import ErrorBoundary from "./ErrorBoundary";
 
 const App = () => {
