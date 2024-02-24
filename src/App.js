@@ -1,25 +1,17 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import DrawPane from "./InitialDrawPanel";
+import ErrorBoundary from "./ErrorBoundary";
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ErrorBoundary>
+      <div className="App">
+        <h1>MODEMA</h1>
+        <DrawPane width={800} height={600} />
+      </div>
+    </ErrorBoundary>
   );
-}
+};
 
 export default App;
+

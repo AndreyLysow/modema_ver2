@@ -1,0 +1,109 @@
+import React, { useState } from "react";
+import PropTypes from "prop-types";
+import "./InitialDrawPanel.css";  // Импорт стилей для компонента
+import { Stage, Layer, Line } from "react-konva";  // Импорт компонентов из библиотеки react-konva
+import { saveAs } from "file-saver";  // Импорт функции saveAs из библиотеки file-saver
+
+// Определение функции для получения масштабированных координат
+const getScaledPoint = (stage, scale) => {
+  const position = stage.getPointerPosition();  // Получаем позицию указателя мыши относительно Stage
+  const x = position.x * scale;  // Масштабируем координату x
+  const y = position.y * scale;  // Масштабируем координату y
+  return { x, y };  // Возвращаем объект с масштабированными координатами
+};
+
+// Определение функционального компонента DrawPane
+const DrawPane = (props) => {
+  // Используем хук состояния для отслеживания линий и режима рисования
+  const [lines, setLines] = useState([]);
+  const [drawing, setDrawing] = useState(false);
+
+  // Обработчик события при нажатии кнопки мыши
+  const handleMouseDown = (e) => {
+    const { x, y } = getScaledPoint(e.target.getStage(), 1);
+    setLines([...lines, { points: [x, y] }]);
+    setDrawing(true);
+  };
+
+  // Обработчик события при перемещении мыши
+  const handleMouseMove = (e) => {
+    if (!drawing) {
+      return;
+    }
+
+    const { x, y } = getScaledPoint(e.target.getStage(), 1);
+    let lastLine = lines[lines.length - 1];
+
+    // Избегаем добавления дубликатов точек
+    if (lastLine.points[0] !== x || lastLine.points[1] !== y) {
+      lastLine.points = lastLine.points.concat([x, y]);
+      setLines([...lines.slice(0, -1), lastLine]);
+    }
+  };
+
+  // Обработчик события при отпускании кнопки мыши
+  const handleMouseUp = () => {
+    setDrawing(false);
+  };
+
+  // Обработчик для сохранения данных в формате JSON
+  const handleSaveJSON = () => {
+    const jsonContent = JSON.stringify(lines, null, 2);
+    const blob = new Blob([jsonContent], { type: "application/json" });
+    saveAs(blob, "drawing.json");
+  };
+
+  // Обработчик для сохранения данных в формате SVG
+  const handleSaveSVG = () => {
+    const svgContent = `
+      <svg width="${props.width}" height="${props.height}" xmlns="http://www.w3.org/2000/svg">
+        ${lines.map((line) => (
+          `<polyline points="${line.points.join(",")}" stroke="#FF0000" stroke-width="8" fill="none" />`
+        )).join("")}
+      </svg>
+    `;
+    const blob = new Blob([svgContent], { type: "image/svg+xml" });
+    saveAs(blob, "drawing.svg");
+  };
+
+  // Возвращаем JSX разметку компонента
+  return (
+    <div>
+      {/* Компонент Stage, предоставляющий область для рисования */}
+      <Stage
+        className="konva-container"
+        width={props.width}
+        height={props.height}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+      >
+        {/* Компонент Layer, на котором рисуются линии */}
+        <Layer>
+          {/* Отображаем все линии на компоненте Layer */}
+          {lines.map((line, index) => (
+            <Line
+              key={index}
+              points={line.points}
+              stroke="#FF0000" // Красный цвет
+              strokeWidth={8}   // Большая толщина
+              lineCap="round"
+            />
+          ))}
+        </Layer>
+      </Stage>
+      {/* Кнопки для сохранения данных в форматах JSON и SVG */}
+      <button onClick={handleSaveJSON}>Save as JSON</button>
+      <button onClick={handleSaveSVG}>Save as SVG</button>
+    </div>
+  );
+};
+
+// Определение propTypes для входных параметров компонента
+DrawPane.propTypes = {
+  width: PropTypes.number,
+  height: PropTypes.number,
+};
+
+// Экспорт компонента DrawPane
+export default DrawPane;
