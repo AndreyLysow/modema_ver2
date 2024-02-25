@@ -1,40 +1,32 @@
 import React, { useEffect, useState } from "react";
-import { Image } from "react-konva";
+import { ReactSVG } from "react-svg";
 
 const SvgComponent = ({ x, y, svgURL }) => {
-  const [image, setImage] = useState(null);
+  const [svgText, setSvgText] = useState(null);
 
   useEffect(() => {
-    const loadImage = async () => {
+    const loadSvg = async () => {
       try {
         const response = await fetch(svgURL);
-        const svgText = await response.text();
-        const blob = new Blob([svgText], { type: "image/svg+xml" });
-        const svgObjectURL = URL.createObjectURL(blob);
-        const img = new window.Image();
-        img.src = svgObjectURL;
-        img.onload = () => setImage(img);
+        const text = await response.text();
+        setSvgText(text);
       } catch (error) {
         console.error("Ошибка при загрузке SVG:", error);
       }
     };
 
-    loadImage();
-
-    return () => {
-      if (image) {
-        URL.revokeObjectURL(image.src);
-      }
-    };
-  }, [svgURL, image]);
+    loadSvg();
+  }, [svgURL]);
 
   return (
-    <Image
+    <ReactSVG
       x={x}
       y={y}
-      image={image}
-      width={42}
-      height={42}
+      src={svgText}
+      beforeInjection={(svg) => {
+        svg.setAttribute("width", "42");
+        svg.setAttribute("height", "42");
+      }}
     />
   );
 };

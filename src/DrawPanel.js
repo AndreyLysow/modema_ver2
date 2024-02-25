@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
-import { Stage, Layer, Line, Group, Image as KonvaImage } from "react-konva";
-import { saveAs } from "file-saver";
 import { Button, makeStyles } from "@material-ui/core";
+import { saveAs } from "file-saver";
 import SvgComponent from "./SvgComponent";
 import "./DrawPanel.css";
 
@@ -42,8 +41,8 @@ const DrawPanel = ({ width, height, selectedSvg }) => {
   }, [selectedSvg]);
 
   const handleMouseDown = (e) => {
-    const { x, y } = e.target.getStage().getPointerPosition();
-    setLines([...lines, { type: "line", points: [roundToGrid(x, 20), roundToGrid(y, 20)] }]);
+    const { nativeEvent: { offsetX, offsetY } } = e;
+    setLines([...lines, { type: "line", points: [roundToGrid(offsetX, 20), roundToGrid(offsetY, 20)] }]);
     setDrawing(true);
   };
 
@@ -52,11 +51,11 @@ const DrawPanel = ({ width, height, selectedSvg }) => {
       return;
     }
 
-    const { x, y } = e.target.getStage().getPointerPosition();
+    const { nativeEvent: { offsetX, offsetY } } = e;
     let lastLine = lines[lines.length - 1];
 
-    const roundedX = roundToGrid(x, 20);
-    const roundedY = roundToGrid(y, 20);
+    const roundedX = roundToGrid(offsetX, 20);
+    const roundedY = roundToGrid(offsetY, 20);
 
     if (lastLine.points[0] !== roundedX || lastLine.points[1] !== roundedY) {
       lastLine.points = [lastLine.points[0], lastLine.points[1], roundedX, roundedY];
@@ -97,11 +96,10 @@ const DrawPanel = ({ width, height, selectedSvg }) => {
     const verticalLines = [];
     for (let i = gridSize; i < width; i += gridSize) {
       verticalLines.push(
-        <Line
+        <line
           key={`vertical_${i}`}
-          points={[i, 0, i, height]}
-          stroke={gridColor}
-          strokeWidth={1}
+          x1={i} y1={0} x2={i} y2={height}
+          stroke={gridColor} strokeWidth={1}
         />
       );
     }
@@ -109,11 +107,10 @@ const DrawPanel = ({ width, height, selectedSvg }) => {
     const horizontalLines = [];
     for (let i = gridSize; i < height; i += gridSize) {
       horizontalLines.push(
-        <Line
+        <line
           key={`horizontal_${i}`}
-          points={[0, i, width, i]}
-          stroke={gridColor}
-          strokeWidth={1}
+          x1={0} y1={i} x2={width} y2={i}
+          stroke={gridColor} strokeWidth={1}
         />
       );
     }
@@ -129,13 +126,16 @@ const DrawPanel = ({ width, height, selectedSvg }) => {
   const handleImageDrop = (e) => {
     e.preventDefault();
     const svgPath = e.dataTransfer.getData("text/plain");
-
+  
     if (stageRef.current) {
-      const pointerPosition = stageRef.current.getPointerPosition();
-
+      const pointerPosition = {
+        x: e.clientX,
+        y: e.clientY,
+      };
+  
       if (pointerPosition) {
         const { x, y } = pointerPosition;
-
+  
         const image = new window.Image();
         image.onload = () => {
           setLines([...lines, { type: "image", image, x, y }]);
@@ -163,46 +163,39 @@ const DrawPanel = ({ width, height, selectedSvg }) => {
       <div
         className={classes.drawArea}
         onDragOver={(e) => e.preventDefault()}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
         onDrop={handleImageDrop}
       >
-        <Stage
-          className="konva-container"
+        <svg
           width={width}
           height={height}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
           ref={stageRef}
         >
-          <Layer>
-            <Grid />
-            {lines.map((item, index) => (
-              <Group key={index}>
-                {item.type === "line" && (
-                  <Line
-                    points={item.points}
-                    stroke="#CF0A00"
-                    strokeWidth={5}
-                    lineCap="round"
-                  />
-                )}
-                {item.type === "image" && (
-                  <KonvaImage
-                    image={item.image}
-                    x={item.x}
-                    y={item.y}
-                    width={100}
-                    height={100}
-                    draggable
-                    onDragStart={(e) => {
-                      e.evt.preventDefault();
-                    }}
-                  />
-                )}
-              </Group>
-            ))}
-          </Layer>
-        </Stage>
+          <Grid />
+          {lines.map((item, index) => (
+            <g key={index}>
+              {item.type === "line" && (
+                <polyline
+                  points={item.points.join(" ")}
+                  stroke="#CF0A00"
+                  strokeWidth={5}
+                  fill="none"
+                />
+              )}
+              {item.type === "image" && (
+                <image
+                  x={item.x}
+                  y={item.y}
+                  width={100}
+                  height={100}
+                  xlinkHref={item.src}
+                />
+              )}
+            </g>
+          ))}
+        </svg>
       </div>
     </div>
   );
@@ -219,6 +212,11 @@ DrawPanel.propTypes = {
 };
 
 export default DrawPanel;
+
+
+
+
+
 
 
 
