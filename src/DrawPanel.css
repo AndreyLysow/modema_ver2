@@ -1,9 +1,34 @@
+/* DrawPanel.css */
+
 .konva-container {
   border: 1px solid #ddd;
 }
 
+.tool-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 20px; /* Добавлен отступ справа */
+}
+
 .save-buttons {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   margin-top: 10px;
+}
+
+.draw-area {
+  flex: 1;
+}
+
+/* Добавлен стиль для центрирования слова "MODEMA" и уменьшения размера шрифта */
+.App {
+  text-align: center;
+}
+
+/* Уменьшен размер шрифта для кнопок Material-UI */
+.save-buttons button {
+  font-size: 14px;
+  margin: 5px 0; /* Добавлен отступ между кнопками */
 }
