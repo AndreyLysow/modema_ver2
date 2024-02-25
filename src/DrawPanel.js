@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
-import { Stage, Layer, Line, Group, Image } from "react-konva";
+import { Stage, Layer, Line, Group, Image as KonvaImage } from "react-konva";
 import { saveAs } from "file-saver";
 import { Button, makeStyles } from "@material-ui/core";
 import SvgComponent from "./SvgComponent";
@@ -26,10 +26,12 @@ const useStyles = makeStyles((theme) => ({
   },
   drawArea: {
     flex: 1,
+    border: "1px solid #ccc",
+    position: "relative",
   },
 }));
 
-const DrawPanel = (props) => {
+const DrawPanel = ({ width, height, selectedSvg }) => {
   const classes = useStyles();
   const [lines, setLines] = useState([]);
   const [drawing, setDrawing] = useState(false);
@@ -37,7 +39,7 @@ const DrawPanel = (props) => {
 
   useEffect(() => {
     setLines([]);
-  }, [props.selectedSvg]);
+  }, [selectedSvg]);
 
   const handleMouseDown = (e) => {
     const { x, y } = e.target.getStage().getPointerPosition();
@@ -74,7 +76,7 @@ const DrawPanel = (props) => {
 
   const handleSaveSVG = () => {
     const svgContent = `
-      <svg width="${props.width}" height="${props.height}" xmlns="http://www.w3.org/2000/svg">
+      <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
         ${lines.map((item) => (
           item.type === "line" ? (
             `<polyline points="${item.points.join(",")}" stroke="#CF0A00" stroke-width="5" fill="none" />`
@@ -93,11 +95,11 @@ const DrawPanel = (props) => {
     const gridColor = "#ddd";
 
     const verticalLines = [];
-    for (let i = gridSize; i < props.width; i += gridSize) {
+    for (let i = gridSize; i < width; i += gridSize) {
       verticalLines.push(
         <Line
           key={`vertical_${i}`}
-          points={[i, 0, i, props.height]}
+          points={[i, 0, i, height]}
           stroke={gridColor}
           strokeWidth={1}
         />
@@ -105,11 +107,11 @@ const DrawPanel = (props) => {
     }
 
     const horizontalLines = [];
-    for (let i = gridSize; i < props.height; i += gridSize) {
+    for (let i = gridSize; i < height; i += gridSize) {
       horizontalLines.push(
         <Line
           key={`horizontal_${i}`}
-          points={[0, i, props.width, i]}
+          points={[0, i, width, i]}
           stroke={gridColor}
           strokeWidth={1}
         />
@@ -126,9 +128,21 @@ const DrawPanel = (props) => {
 
   const handleImageDrop = (e) => {
     e.preventDefault();
-    const imageName = e.dataTransfer.getData("image/svg+xml");
-    const { x, y } = stageRef.current.getPointerPosition();
-    setLines([...lines, { type: "image", src: props.selectedSvg, x, y }]);
+    const svgPath = e.dataTransfer.getData("text/plain");
+
+    if (stageRef.current) {
+      const pointerPosition = stageRef.current.getPointerPosition();
+
+      if (pointerPosition) {
+        const { x, y } = pointerPosition;
+
+        const image = new window.Image();
+        image.onload = () => {
+          setLines([...lines, { type: "image", image, x, y }]);
+        };
+        image.src = svgPath;
+      }
+    }
   };
 
   return (
@@ -138,23 +152,26 @@ const DrawPanel = (props) => {
           <Button onClick={handleSaveJSON}>Сохранить как JSON</Button>
           <Button onClick={handleSaveSVG}>Сохранить как SVG</Button>
         </div>
-        {props.selectedSvg && (
+        {selectedSvg && (
           <SvgComponent
-            svgURL={props.selectedSvg}
+            svgURL={selectedSvg}
             onDrop={handleImageDrop}
           />
         )}
       </div>
 
-      <div className={classes.drawArea}>
+      <div
+        className={classes.drawArea}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={handleImageDrop}
+      >
         <Stage
           className="konva-container"
-          width={props.width}
-          height={props.height}
+          width={width}
+          height={height}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
-          onDrop={handleImageDrop}
           ref={stageRef}
         >
           <Layer>
@@ -170,10 +187,16 @@ const DrawPanel = (props) => {
                   />
                 )}
                 {item.type === "image" && (
-                  <Image
-                    image={item}
+                  <KonvaImage
+                    image={item.image}
+                    x={item.x}
+                    y={item.y}
+                    width={100}
+                    height={100}
                     draggable
-                    onDragStart={(e) => e.preventDefault()}
+                    onDragStart={(e) => {
+                      e.evt.preventDefault();
+                    }}
                   />
                 )}
               </Group>
@@ -196,5 +219,9 @@ DrawPanel.propTypes = {
 };
 
 export default DrawPanel;
+
+
+
+
 
 
