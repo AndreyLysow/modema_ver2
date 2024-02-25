@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Shape } from "react-konva";
+import { Image } from "react-konva";
 
-const SvgComponent = ({ x, y }) => {
-  const svgURL = "/path/to/your/svg/file.svg"; // Замените на путь к вашему файлу SVG
-
+const SvgComponent = ({ x, y, svgURL }) => {
   const [image, setImage] = useState(null);
 
   useEffect(() => {
@@ -17,7 +15,7 @@ const SvgComponent = ({ x, y }) => {
         img.src = svgObjectURL;
         img.onload = () => setImage(img);
       } catch (error) {
-        console.error("Error loading SVG:", error);
+        console.error("Ошибка при загрузке SVG:", error);
       }
     };
 
@@ -31,17 +29,20 @@ const SvgComponent = ({ x, y }) => {
   }, [svgURL, image]);
 
   return (
-    <Shape
+    <Image
       x={x}
       y={y}
-      sceneFunc={(context, shape) => {
-        if (image) {
-          context.drawImage(image, 0, 0, 42, 42);
-          shape.getLayer().batchDraw();
-        }
-      }}
+      image={image}
+      width={42}
+      height={42}
     />
   );
 };
 
 export default SvgComponent;
+
+
+
+
+
+

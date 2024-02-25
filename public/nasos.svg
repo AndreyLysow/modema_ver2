@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="80" width="80">
+    <g>
+        <line x1="20" y1="40" x2="60" y2="40" stroke-width="2" stroke="#242424"/>
+        <circle cx="40" cy="40" r="10" stroke-width="1" stroke="#242424" fill="#ffffff"/>
+        <polyline points="40 30 40 50 30 40 40 30" stroke-linejoin="bevel" stroke-width="1" stroke="#242424" fill="#c2c2c2"/>
+    </g>
+</svg>

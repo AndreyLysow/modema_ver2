@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import DrawPanel from "./DrawPanel";
+import DrawInputPanel from "./DrawInputPanel";  // Импортируем DrawInputPanel
 import ErrorBoundary from "./ErrorBoundary";
 import { CssBaseline, Container, Typography } from "@material-ui/core";
 import "./App.css";
+
+
 
 const App = () => {
   const [showText, setShowText] = useState(0);
@@ -40,7 +42,7 @@ const App = () => {
       <Container className="App">
         <div className="letters-container">{renderLetters()}</div>
 
-        <DrawPanel width={1050} height={500} />
+        <DrawInputPanel width={1050} height={500} /> {/* Используем DrawInputPanel вместо DrawPanel */}
       </Container>
     </ErrorBoundary>
   );

@@ -1,17 +1,18 @@
 .blinking-text {
   animation: blink 1s linear infinite;
+  color: #130498;
 }
 
 @keyframes blink {
   50% {
-    opacity: 0.5; /* Половина времени с половинной прозрачностью */
-    color: #5e5a80; /* Цвет текста в перигее */
+    opacity: 0.5;
+    color: #5e5a80;
   }
 }
 
 .hidden-text {
-  opacity: 0.5; /* Начальная половинная прозрачность при скрытии */
-  color: #2213ab; /* Начальный цвет текста при скрытии */
+  opacity: 0.5;
+  color: #2213ab;
 }
 
 .letters-container {
@@ -19,10 +20,9 @@
   justify-content: space-around;
 }
 
-
 .blinking-text,
 .hidden-text {
-  font-size: 0.5rem; /* Увеличиваем размер шрифта на 20% */
-  letter-spacing: 0.0033rem; /* Уменьшаем расстояние между буквами на полтора раза */
-  font-weight: 600; /* Увеличиваем толщину шрифта на 20% (600 - полужирный) */
+  font-size: 0.5rem;
+  letter-spacing: 0.0033rem;
+  font-weight: 600;
 }
